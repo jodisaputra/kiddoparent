@@ -3,6 +3,8 @@ import {ScrollView, StyleSheet, View} from 'react-native';
 import {Button, Gap, Header, Input, Loading} from '../../components';
 import {colors, useForm} from '../../utils';
 import {getData} from '../../utils/localstorage';
+import firestore from '@react-native-firebase/firestore';
+import {showMessage} from 'react-native-flash-message';
 
 const RewardAdd = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -12,22 +14,33 @@ const RewardAdd = ({navigation}) => {
   });
 
   const saveReward = () => {
-    // setLoading(true);
-    // getData('admin').then(res => {
-    //   const email = res.email;
-    //   const data = {
-    //     name: form.name,
-    //     cost: form.cost,
-    //     added_by: email,
-    //     claimed: 'no',
-    //   };
-    //   // console.log('user data', data);
-    //   Fire.database()
-    //     .ref('/rewards')
-    //     .push(data);
-    //   setLoading(false);
-    //   navigation.navigate('Reward');
-    // });
+    setLoading(true);
+    getData('admin').then(res => {
+      const email = res.email;
+      const data = {
+        name: form.name,
+        cost: form.cost,
+        added_by: email,
+        claimed: 'no',
+      };
+      firestore()
+        .collection('rewards')
+        .add(data)
+        .then(() => {
+          console.log('success');
+          setLoading(false);
+          navigation.navigate('Reward');
+        })
+        .catch(error => {
+          setLoading(false);
+          showMessage({
+            message: error,
+            type: 'default',
+            backgroundColor: colors.errorMessage,
+          });
+          console.log('error register', errorMessage);
+        });
+    });
   };
   return (
     <>

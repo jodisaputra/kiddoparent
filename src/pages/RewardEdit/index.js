@@ -3,6 +3,7 @@ import {ScrollView, StyleSheet, View, Alert} from 'react-native';
 import {showMessage} from 'react-native-flash-message';
 import {Button, Gap, Header, Input, Loading} from '../../components';
 import {colors} from '../../utils';
+import firestore from '@react-native-firebase/firestore';
 
 const RewardEdit = ({route, navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -14,11 +15,11 @@ const RewardEdit = ({route, navigation}) => {
   });
 
   useEffect(() => {
-    // Fire.database()
-    //   .ref(`rewards/${rewardItem}/`)
-    //   .on('value', rewardId => {
-    //     setReward(rewardId.val());
-    //   });
+    const reward = firestore()
+      .doc(`rewards/${rewardItem}`)
+      .get();
+    // console.log(reward);
+    setReward(reward);
   }, []);
 
   const update = () => {
@@ -70,9 +71,6 @@ const RewardEdit = ({route, navigation}) => {
   };
 
   const removeAction = () => {
-    // Fire.database()
-    //   .ref(`rewards/${rewardItem}/`)
-    //   .remove();
     // navigation.navigate('Reward');
   };
 
@@ -81,19 +79,19 @@ const RewardEdit = ({route, navigation}) => {
       <ScrollView style={styles.container}>
         <Header title="Edit Reward" onPress={() => navigation.goBack()} />
         <View style={styles.page}>
-          {/* <Input
+          <Input
             label="Reward Name"
             value={reward.name}
-            onChangeText={(value) => changeText('name', value)}
+            onChangeText={value => changeText('name', value)}
           />
           <Gap height={20} />
           <Input
             label="Cost"
             value={reward.cost}
             keyboardType="numeric"
-            onChangeText={(value) => changeText('cost', value)}
+            onChangeText={value => changeText('cost', value)}
           />
-          <Gap height={20} /> */}
+          <Gap height={20} />
           <View style={styles.button}>
             <Button title="Save Changes" onPress={update} />
             <Gap height={20} />

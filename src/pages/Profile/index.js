@@ -4,6 +4,7 @@ import {ILNullPhoto} from '../../assets';
 import {Button, Header, HeaderProfile} from '../../components';
 import {colors} from '../../utils';
 import {getData} from '../../utils/localstorage';
+import auth from '@react-native-firebase/auth';
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -20,9 +21,9 @@ const Profile = () => {
   }, []);
 
   const logout = () => {
-    // Fire.auth()
-    //   .signOut()
-    //   .then(() => console.log('User signed out!'));
+    auth()
+      .signOut()
+      .then(() => console.log('User signed out!'));
   };
 
   return (

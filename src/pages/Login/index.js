@@ -5,6 +5,8 @@ import {Button, Gap, Input, Link, Loading} from '../../components';
 import {colors, fonts, useForm} from '../../utils';
 import {storeData} from '../../utils/localstorage';
 import {showMessage} from 'react-native-flash-message';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const Login = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -14,31 +16,38 @@ const Login = ({navigation}) => {
   });
 
   const login = () => {
-    // setLoading(true);
-    // Fire.auth()
-    //   .signInWithEmailAndPassword(form.email, form.password)
-    //   .then((result) => {
-    //     setLoading(false);
-    //     // ambil data user
-    //     Fire.database()
-    //       .ref(`admin/${result.user.uid}/`)
-    //       .once('value')
-    //       .then((resDB) => {
-    //         console.log('res db', resDB.val());
-    //         if (resDB.val()) {
-    //           storeData('admin', resDB.val());
-    //           navigation.replace('MainApp');
-    //         }
-    //       });
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false);
-    //     showMessage({
-    //       message: error.message,
-    //       type: 'default',
-    //       backgroundColor: colors.errorMessage,
-    //     });
-    //   });
+    setLoading(true);
+    if (form.email === '' || form.password === '') {
+      setLoading(false);
+      showMessage({
+        message: 'Please fill your email and password !!',
+        type: 'default',
+        backgroundColor: colors.errorMessage,
+      });
+    } else {
+      auth()
+        .signInWithEmailAndPassword(form.email, form.password)
+        .then(result => {
+          setLoading(false);
+          firestore()
+            .doc(`admin/${result.user.uid}`)
+            .get()
+            .then(documentSnapshot => {
+              if (documentSnapshot) {
+                storeData('admin', documentSnapshot.data());
+                navigation.replace('MainApp');
+              }
+            });
+        })
+        .catch(error => {
+          setLoading(false);
+          showMessage({
+            message: error.message,
+            type: 'default',
+            backgroundColor: colors.errorMessage,
+          });
+        });
+    }
   };
 
   return (

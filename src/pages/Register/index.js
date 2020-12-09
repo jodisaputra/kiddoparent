@@ -12,6 +12,8 @@ import {IconAddPhoto, IconRemovePhoto, ILNullPhoto} from '../../assets';
 import {Button, Gap, Header, Input, Loading} from '../../components';
 import {colors, useForm} from '../../utils';
 import {storeData} from '../../utils/localstorage';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const Register = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -51,37 +53,38 @@ const Register = ({navigation}) => {
   });
 
   const submitForm = () => {
-    // setLoading(true);
-    // Fire.auth()
-    //   .createUserWithEmailAndPassword(form.email, form.password)
-    //   .then(success => {
-    //     setLoading(false);
-    //     // reset form setelah daftar
-    //     setForm('reset');
-    //     const data = {
-    //       name: form.name,
-    //       email: form.email,
-    //       uid: success.user.uid,
-    //       photo: photoDB,
-    //     };
-    //     Fire.database()
-    //       .ref('admin/' + success.user.uid + '/')
-    //       .set(data);
-    //     // simpan ke local storage
-    //     storeData('admin', data);
-    //     navigation.navigate('Login');
-    //     // console.log('register success', success);
-    //   })
-    //   .catch(error => {
-    //     setLoading(false);
-    //     var errorMessage = error.message;
-    //     showMessage({
-    //       message: errorMessage,
-    //       type: 'default',
-    //       backgroundColor: colors.errorMessage,
-    //     });
-    //     console.log('error register', errorMessage);
-    //   });
+    setLoading(true);
+    auth()
+      .createUserWithEmailAndPassword(form.email, form.password)
+      .then(success => {
+        setLoading(false);
+        // reset form setelah daftar
+        setForm('reset');
+        const data = {
+          name: form.name,
+          email: form.email,
+          uid: success.user.uid,
+          photo: photoDB,
+        };
+        firestore()
+          .collection('admin')
+          .doc(success.user.uid)
+          .set(data);
+        // simpan ke local storage
+        storeData('admin', data);
+        navigation.navigate('Login');
+        // console.log('register success', success);
+      })
+      .catch(error => {
+        setLoading(false);
+        var errorMessage = error.message;
+        showMessage({
+          message: errorMessage,
+          type: 'default',
+          backgroundColor: colors.errorMessage,
+        });
+        console.log('error register', errorMessage);
+      });
   };
 
   return (

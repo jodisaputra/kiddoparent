@@ -3,6 +3,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Header, HeaderProfile, Button, ListReward} from '../../components';
 import {getData} from '../../utils/localstorage';
+import firestore from '@react-native-firebase/firestore';
 
 const Reward = ({navigation}) => {
   const [listReward, setListReward] = useState([]);
@@ -12,26 +13,22 @@ const Reward = ({navigation}) => {
   }, []);
 
   const getDataReward = () => {
-    // getData('admin').then(res => {
-    //   Fire.database()
-    //     .ref('rewards')
-    //     .orderByChild('added_by')
-    //     .equalTo(res.email)
-    //     .on('value', reward => {
-    //       if (reward.val()) {
-    //         // variabel data dalam bentuk objek
-    //         const oldData = reward.val();
-    //         const data = [];
-    //         Object.keys(oldData).map(key => {
-    //           data.push({
-    //             id: key,
-    //             data: oldData[key],
-    //           });
-    //         });
-    //         setListReward(data);
-    //       }
-    //     });
-    // });
+    getData('admin').then(res => {
+      firestore()
+        .collection('rewards')
+        .where('added_by', '==', res.email)
+        .onSnapshot(docs => {
+          let listrewards = [];
+          docs.forEach(doc => {
+            listrewards.push({
+              ...doc.data(),
+              key: doc.id,
+            });
+          });
+          console.log(listrewards);
+          setListReward(listrewards);
+        });
+    });
   };
   return (
     <View>
@@ -44,10 +41,10 @@ const Reward = ({navigation}) => {
           {listReward.map(reward => {
             return (
               <ListReward
-                key={reward.id}
-                title={reward.data.name}
-                total={reward.data.cost}
-                onPress={() => navigation.navigate('RewardEdit', reward.id)}
+                key={reward.key}
+                title={reward.name}
+                total={reward.cost}
+                onPress={() => navigation.navigate('RewardEdit', reward.key)}
               />
             );
           })}

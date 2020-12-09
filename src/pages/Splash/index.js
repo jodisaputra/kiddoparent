@@ -1,19 +1,19 @@
+import auth from '@react-native-firebase/auth';
 import React, {useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {ILLogo} from '../../assets';
 import {colors, fonts} from '../../utils';
-import {getData} from '../../utils/localstorage';
 
 const Splash = ({navigation}) => {
   useEffect(() => {
     setTimeout(() => {
-      // Fire.auth().onAuthStateChanged((admin) => {
-      //   if (admin) {
-      //     navigation.replace('MainApp');
-      //   } else {
-      navigation.replace('GetStarted');
-      //   }
-      // });
+      auth().onAuthStateChanged(admin => {
+        if (admin) {
+          navigation.replace('MainApp');
+        } else {
+          navigation.replace('GetStarted');
+        }
+      });
     }, 3000);
   }, []);
   return (

@@ -17,6 +17,7 @@ const Reward = ({navigation}) => {
       firestore()
         .collection('rewards')
         .where('added_by', '==', res.email)
+        .where('claimed', '==', 'no')
         .onSnapshot(docs => {
           let listrewards = [];
           docs.forEach(doc => {

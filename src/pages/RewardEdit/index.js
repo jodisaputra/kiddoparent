@@ -15,30 +15,44 @@ const RewardEdit = ({route, navigation}) => {
   });
 
   useEffect(() => {
-    const reward = firestore()
-      .doc(`rewards/${rewardItem}`)
-      .get();
-    // console.log(reward);
-    setReward(reward);
+    const dbRef = firestore()
+      .collection('rewards')
+      .doc(rewardItem);
+    dbRef.get().then(result => {
+      if (result.exists) {
+        const reward = result.data();
+        setReward(reward);
+      } else {
+        showMessage({
+          message: 'reward does not exist',
+          type: 'default',
+          backgroundColor: colors.red1,
+        });
+      }
+    });
   }, []);
 
   const update = () => {
-    // setLoading(true);
-    // Fire.database()
-    //   .ref(`rewards/${rewardItem}/`)
-    //   .update(reward)
-    //   .then(() => {
-    //     navigation.navigate('Reward');
-    //     setLoading(false);
-    //   })
-    //   .catch(error => {
-    //     setLoading(false);
-    //     showMessage({
-    //       message: error.message,
-    //       type: 'default',
-    //       backgroundColor: colors.red1,
-    //     });
-    //   });
+    setLoading(true);
+    const updateDbRef = firestore()
+      .collection('rewards')
+      .doc(rewardItem);
+
+    updateDbRef
+      .set(reward)
+      .then(() => {
+        setLoading(false);
+        console.log('success');
+        navigation.navigate('Reward');
+      })
+      .catch(error => {
+        setLoading(false);
+        showMessage({
+          message: error,
+          type: 'default',
+          backgroundColor: colors.red1,
+        });
+      });
   };
 
   const changeText = (key, value) => {
@@ -51,13 +65,10 @@ const RewardEdit = ({route, navigation}) => {
 
   const remove = () => {
     Alert.alert(
-      'Delete Reward',
+      'Delete reward',
       'Are you sure?',
       [
-        {
-          text: 'Yes',
-          onPress: () => removeAction(),
-        },
+        {text: 'Yes', onPress: () => removeAction()},
         {
           text: 'No',
           onPress: () => console.log('No item was removed'),
@@ -71,7 +82,13 @@ const RewardEdit = ({route, navigation}) => {
   };
 
   const removeAction = () => {
-    // navigation.navigate('Reward');
+    const dbRef = firestore()
+      .collection('rewards')
+      .doc(rewardItem);
+    dbRef.delete().then(() => {
+      console.log('data deleted success');
+      navigation.navigate('Reward');
+    });
   };
 
   return (

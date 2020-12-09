@@ -25,7 +25,6 @@ const Reward = ({navigation}) => {
               key: doc.id,
             });
           });
-          console.log(listrewards);
           setListReward(listrewards);
         });
     });

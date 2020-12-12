@@ -5,10 +5,7 @@ import {colors, fonts} from '../../../utils';
 
 const List = ({onPress, onLongPress, point, title, avatar, time}) => {
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      onLongPress={onLongPress}>
+    <View style={styles.container} onPress={onPress} onLongPress={onLongPress}>
       <View>
         <IconStar style={styles.icon} />
         <Text style={styles.poin}>{point}</Text>
@@ -23,7 +20,7 @@ const List = ({onPress, onLongPress, point, title, avatar, time}) => {
           <Text>{time}</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

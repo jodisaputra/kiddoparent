@@ -9,14 +9,17 @@ import {
 } from 'react-native';
 import {showMessage} from 'react-native-flash-message';
 import {IconAddPhoto, IconRemovePhoto, ILNullTask} from '../../assets';
-import {Gap, Header, Input, Button} from '../../components';
+import {Gap, Header, Input, Button, Loading} from '../../components';
 import {colors, fonts, useForm} from '../../utils';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import ImagePicker from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
+import {getData} from '../../utils/localstorage';
 
 const TaskAdd = ({navigation}) => {
+  const [loading, setLoading] = useState(false);
+
   const [timePickerVisibleFrom, setTimePickerVisibleFrom] = useState(false);
   const [timePickerVisibleTo, setTimePickerVisibleTo] = useState(false);
   const [timeFrom, setTimeFrom] = useState('');
@@ -75,67 +78,113 @@ const TaskAdd = ({navigation}) => {
 
   // deklarasi form
   const [form, setForm] = useForm({
-    name: '',
-    cost: '',
+    task_title: '',
+    desc: '',
+    points: '',
   });
 
-  const saveTask = () => {};
+  const saveTask = () => {
+    setLoading(true);
+    getData('admin').then((res) => {
+      const email = res.email;
+      const data = {
+        task_title: form.task_title,
+        desc: form.desc,
+        points: form.points,
+        from: timeFrom,
+        to: timeTo,
+        icon: photoDB,
+        added_by: email,
+        status: 'not done',
+      };
+      firestore()
+        .collection('tasks')
+        .add(data)
+        .then(() => {
+          setLoading(false);
+          navigation.navigate('MainApp');
+        })
+        .catch((error) => {
+          setLoading(false);
+          showMessage({
+            message: error,
+            type: 'default',
+            backgroundColor: colors.errorMessage,
+          });
+          console.log('error Save Task', errorMessage);
+          navigation.navigate('MainApp');
+        });
+    });
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Header title="Add New Task" onPress={() => navigation.goBack()} />
-      <View style={styles.page}>
-        <View style={styles.task}>
-          <View style={styles.iconBorder}>
-            <TouchableOpacity style={styles.avatarBorder} onPress={getImage}>
-              <Image source={photo} style={styles.avatar} />
-              {hasPhoto && <IconRemovePhoto style={styles.addPhoto} />}
-              {!hasPhoto && <IconAddPhoto style={styles.addPhoto} />}
-            </TouchableOpacity>
+    <>
+      <ScrollView style={styles.container}>
+        <Header title="Add New Task" onPress={() => navigation.goBack()} />
+        <View style={styles.page}>
+          <View style={styles.task}>
+            <View style={styles.iconBorder}>
+              <TouchableOpacity style={styles.avatarBorder} onPress={getImage}>
+                <Image source={photo} style={styles.avatar} />
+                {hasPhoto && <IconRemovePhoto style={styles.addPhoto} />}
+                {!hasPhoto && <IconAddPhoto style={styles.addPhoto} />}
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Gap height={24} />
+          <Input
+            label="Task Title"
+            onChangeText={(value) => setForm('task_title', value)}
+          />
+          <Gap height={24} />
+          <Input
+            label="Description"
+            onChangeText={(value) => setForm('desc', value)}
+          />
+          <Gap height={24} />
+          <Input
+            label="Number of Points"
+            onChangeText={(value) => setForm('points', value)}
+            keyboardType="numeric"
+          />
+          <Gap height={24} />
+          <View>
+            <Text style={styles.label}>From: {timeFrom}</Text>
+            <Button
+              type="btn-modal"
+              title="Pick date time from"
+              onPress={showDatePickerFrom}
+            />
+            <DateTimePickerModal
+              isVisible={timePickerVisibleFrom}
+              mode="datetime"
+              onConfirm={handleConfirmFor}
+              onCancel={hideDatePickerFrom}
+            />
+          </View>
+          <Gap height={24} />
+          <View>
+            <Text style={styles.label}>To: {timeTo}</Text>
+            <Button
+              type="btn-modal"
+              title="Pick date time to"
+              onPress={showDatePickerTo}
+            />
+            <DateTimePickerModal
+              isVisible={timePickerVisibleTo}
+              mode="datetime"
+              onConfirm={handleConfirmTo}
+              onCancel={hideDatePickerTo}
+            />
+          </View>
+          <Gap height={50} />
+          <View style={styles.button}>
+            <Button title="Save Task" onPress={saveTask} />
           </View>
         </View>
-        <Gap height={24} />
-        <Input label="Task Title" />
-        <Gap height={24} />
-        <Input label="Description" />
-        <Gap height={24} />
-        <Input label="Number of Points" />
-        <Gap height={24} />
-        <View>
-          <Text style={styles.label}>From: {timeFrom}</Text>
-          <Button
-            type="btn-modal"
-            title="Pick date time from"
-            onPress={showDatePickerFrom}
-          />
-          <DateTimePickerModal
-            isVisible={timePickerVisibleFrom}
-            mode="datetime"
-            onConfirm={handleConfirmFor}
-            onCancel={hideDatePickerFrom}
-          />
-        </View>
-        <Gap height={24} />
-        <View>
-          <Text style={styles.label}>To: {timeTo}</Text>
-          <Button
-            type="btn-modal"
-            title="Pick date time to"
-            onPress={showDatePickerTo}
-          />
-          <DateTimePickerModal
-            isVisible={timePickerVisibleTo}
-            mode="datetime"
-            onConfirm={handleConfirmTo}
-            onCancel={hideDatePickerTo}
-          />
-        </View>
-        <Gap height={50} />
-        <View style={styles.button}>
-          <Button title="Save Task" onPress={saveTask} />
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+      {loading && <Loading />}
+    </>
   );
 };
 

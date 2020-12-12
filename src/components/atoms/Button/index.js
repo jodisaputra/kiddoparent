@@ -3,6 +3,7 @@ import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 import IconButtonPlus from './IconButtonPlus';
 import {colors, fonts} from '../../../utils';
 import IconOnly from './IconOnly';
+import ButtonModal from './ButtonModal';
 
 const Button = ({type, title, onPress}) => {
   if (type === 'icon-only') {
@@ -11,6 +12,10 @@ const Button = ({type, title, onPress}) => {
 
   if (type === 'icon-plus') {
     return <IconButtonPlus onPress={onPress} />;
+  }
+
+  if (type === 'btn-modal') {
+    return <ButtonModal onPress={onPress} title={title} />;
   }
   return (
     <TouchableOpacity style={styles.container(type)} onPress={onPress}>
@@ -22,7 +27,7 @@ const Button = ({type, title, onPress}) => {
 export default Button;
 
 const styles = StyleSheet.create({
-  container: (type) => ({
+  container: type => ({
     backgroundColor: type === 'secondary' ? colors.secondary : colors.primary,
     paddingVertical: 10,
     borderRadius: 20,

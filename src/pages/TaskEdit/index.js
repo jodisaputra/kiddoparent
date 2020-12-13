@@ -44,7 +44,8 @@ const TaskEdit = ({navigation, route}) => {
     dbRef.get().then(result => {
       if (result.exists) {
         const tasks = result.data();
-        console.log('get task id:', tasks);
+        setPhoto({uri: tasks.icon});
+        setHasPhoto(true);
         setTask(tasks);
       } else {
         showMessage({
@@ -127,13 +128,6 @@ const TaskEdit = ({navigation, route}) => {
     );
   };
 
-  // deklarasi form
-  const [form, setForm] = useForm({
-    task_title: '',
-    desc: '',
-    points: '',
-  });
-
   const saveTask = () => {
     setLoading(true);
     getData('admin').then(res => {
@@ -171,7 +165,7 @@ const TaskEdit = ({navigation, route}) => {
   return (
     <>
       <ScrollView style={styles.container}>
-        <Header title="Add New Task" onPress={() => navigation.goBack()} />
+        <Header title="Edit Task" onPress={() => navigation.goBack()} />
         <View style={styles.page}>
           <View style={styles.task}>
             <View style={styles.iconBorder}>
@@ -186,19 +180,19 @@ const TaskEdit = ({navigation, route}) => {
           <Input
             label="Task Title"
             value={task.task_title}
-            onChangeText={value => changeForm('task_title', value)}
+            onChangeText={value => changeText('task_title', value)}
           />
           <Gap height={24} />
           <Input
             label="Description"
             value={task.desc}
-            onChangeText={value => changeForm('desc', value)}
+            onChangeText={value => changeText('desc', value)}
           />
           <Gap height={24} />
           <Input
             label="Number of Points"
             value={task.points}
-            onChangeText={value => changeForm('points', value)}
+            onChangeText={value => changeText('points', value)}
             keyboardType="numeric"
           />
           <Gap height={24} />

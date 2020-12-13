@@ -52,8 +52,8 @@ const styles = StyleSheet.create({
     right: 35,
     top: -30,
   },
-  clock: {marginRight: 8, alignContent: 'center'},
-  time: {position: 'absolute', top: 150, right: 60, flexDirection: 'row'},
+  clock: {marginRight: 2, alignContent: 'center'},
+  time: {position: 'absolute', top: 150, right: 40, flexDirection: 'row'},
   poin: {
     position: 'absolute',
     right: 45,

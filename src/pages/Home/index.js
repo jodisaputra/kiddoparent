@@ -49,7 +49,7 @@ const Home = ({navigation}) => {
                 point={task.points}
                 title={task.task_title}
                 avatar={{uri: task.icon}}
-                time="07:00"
+                time={task.from + ' - ' + task.to}
                 onPress={() => alert('tes')}
               />
             );

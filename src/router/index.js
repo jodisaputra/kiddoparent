@@ -9,6 +9,7 @@ import {
   Reward,
   Profile,
   TaskAdd,
+  TaskEdit,
   RewardAdd,
   RewardEdit,
 } from '../pages';
@@ -21,7 +22,7 @@ const Tab = createBottomTabNavigator();
 
 const MainApp = () => {
   return (
-    <Tab.Navigator tabBar={(props) => <BottomNavigator {...props} />}>
+    <Tab.Navigator tabBar={props => <BottomNavigator {...props} />}>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Reward" component={Reward} />
       <Tab.Screen name="Profile" component={Profile} />
@@ -60,6 +61,11 @@ const Router = () => {
       <Stack.Screen
         name="TaskAdd"
         component={TaskAdd}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="TaskEdit"
+        component={TaskEdit}
         options={{headerShown: false}}
       />
       <Stack.Screen

@@ -50,7 +50,7 @@ const Home = ({navigation}) => {
                 title={task.task_title}
                 avatar={{uri: task.icon}}
                 time={task.from + ' - ' + task.to}
-                onPress={() => alert('tes')}
+                onPress={() => navigation.navigate('TaskEdit', task.key)}
               />
             );
           })}

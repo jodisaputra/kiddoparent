@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Image,
   ScrollView,
@@ -17,13 +17,64 @@ import ImagePicker from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
 import {getData} from '../../utils/localstorage';
 
-const TaskEdit = ({navigation}) => {
+const TaskEdit = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
 
+  const taskItem = route.params;
+  const [task, setTask] = useState({
+    task_title: '',
+    desc: '',
+    from: '',
+    to: '',
+    date: '',
+  });
+
+  const changeText = (key, value) => {
+    setTask({
+      // copy data lama
+      ...task,
+      [key]: value,
+    });
+  };
+
+  useEffect(() => {
+    const dbRef = firestore()
+      .collection('tasks')
+      .doc(taskItem);
+    dbRef.get().then(result => {
+      if (result.exists) {
+        const tasks = result.data();
+        console.log('get task id:', tasks);
+        setTask(tasks);
+      } else {
+        showMessage({
+          message: 'tasks does not exist',
+          type: 'default',
+          backgroundColor: colors.red1,
+        });
+      }
+    });
+  }, []);
+
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisibleFrom, setTimePickerVisibleFrom] = useState(false);
   const [timePickerVisibleTo, setTimePickerVisibleTo] = useState(false);
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
+  const [dateTask, setDateTask] = useState('');
+
+  // date
+  const showDatePicker = () => {
+    setDatePickerVisible(true);
+  };
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+  const handleConfirmDate = date => {
+    setDateTask(moment(date).format('MMMM, Do YYYY'));
+    hideDatePicker();
+  };
+
   // from
   const showDatePickerFrom = () => {
     setTimePickerVisibleFrom(true);
@@ -134,17 +185,20 @@ const TaskEdit = ({navigation}) => {
           <Gap height={24} />
           <Input
             label="Task Title"
-            onChangeText={value => setForm('task_title', value)}
+            value={task.task_title}
+            onChangeText={value => changeForm('task_title', value)}
           />
           <Gap height={24} />
           <Input
             label="Description"
-            onChangeText={value => setForm('desc', value)}
+            value={task.desc}
+            onChangeText={value => changeForm('desc', value)}
           />
           <Gap height={24} />
           <Input
             label="Number of Points"
-            onChangeText={value => setForm('points', value)}
+            value={task.points}
+            onChangeText={value => changeForm('points', value)}
             keyboardType="numeric"
           />
           <Gap height={24} />
@@ -175,6 +229,21 @@ const TaskEdit = ({navigation}) => {
               mode="datetime"
               onConfirm={handleConfirmTo}
               onCancel={hideDatePickerTo}
+            />
+          </View>
+          <Gap height={24} />
+          <View>
+            <Text style={styles.label}>Date: {dateTask}</Text>
+            <Button
+              type="btn-modal"
+              title="Pick date"
+              onPress={showDatePicker}
+            />
+            <DateTimePickerModal
+              isVisible={datePickerVisible}
+              mode="date"
+              onConfirm={handleConfirmDate}
+              onCancel={hideDatePicker}
             />
           </View>
           <Gap height={50} />

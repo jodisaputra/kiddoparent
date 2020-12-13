@@ -20,10 +20,25 @@ import {getData} from '../../utils/localstorage';
 const TaskAdd = ({navigation}) => {
   const [loading, setLoading] = useState(false);
 
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisibleFrom, setTimePickerVisibleFrom] = useState(false);
   const [timePickerVisibleTo, setTimePickerVisibleTo] = useState(false);
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
+  const [dateTask, setDateTask] = useState('');
+
+  // date
+  const showDatePicker = () => {
+    setDatePickerVisible(true);
+  };
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+  const handleConfirmDate = date => {
+    setDateTask(moment(date).format('MMMM, Do YYYY'));
+    hideDatePicker();
+  };
+
   // from
   const showDatePickerFrom = () => {
     setTimePickerVisibleFrom(true);
@@ -31,8 +46,8 @@ const TaskAdd = ({navigation}) => {
   const hideDatePickerFrom = () => {
     setTimePickerVisibleFrom(false);
   };
-  const handleConfirmFor = (datetime) => {
-    setTimeFrom(moment(datetime).format('MMMM, Do YYYY HH:mm'));
+  const handleConfirmFor = datetime => {
+    setTimeFrom(moment(datetime).format('HH:mm'));
     hideDatePickerFrom();
   };
 
@@ -43,8 +58,8 @@ const TaskAdd = ({navigation}) => {
   const hideDatePickerTo = () => {
     setTimePickerVisibleTo(false);
   };
-  const handleConfirmTo = (datetime) => {
-    setTimeTo(moment(datetime).format('MMMM, Do YYYY HH:mm'));
+  const handleConfirmTo = datetime => {
+    setTimeTo(moment(datetime).format('HH:mm'));
     hideDatePickerTo();
   };
 
@@ -58,7 +73,7 @@ const TaskAdd = ({navigation}) => {
   const getImage = () => {
     ImagePicker.launchImageLibrary(
       {quality: 0.5, maxWidth: 300, maxHeight: 300},
-      (response) => {
+      response => {
         console.log('response:', response);
         if (response.didCancel || response.error) {
           showMessage({
@@ -85,7 +100,7 @@ const TaskAdd = ({navigation}) => {
 
   const saveTask = () => {
     setLoading(true);
-    getData('admin').then((res) => {
+    getData('admin').then(res => {
       const email = res.email;
       const data = {
         task_title: form.task_title,
@@ -96,6 +111,7 @@ const TaskAdd = ({navigation}) => {
         icon: photoDB,
         added_by: email,
         status: 'not done',
+        date: dateTask,
       };
       firestore()
         .collection('tasks')
@@ -104,7 +120,7 @@ const TaskAdd = ({navigation}) => {
           setLoading(false);
           navigation.navigate('MainApp');
         })
-        .catch((error) => {
+        .catch(error => {
           setLoading(false);
           showMessage({
             message: error,
@@ -134,17 +150,17 @@ const TaskAdd = ({navigation}) => {
           <Gap height={24} />
           <Input
             label="Task Title"
-            onChangeText={(value) => setForm('task_title', value)}
+            onChangeText={value => setForm('task_title', value)}
           />
           <Gap height={24} />
           <Input
             label="Description"
-            onChangeText={(value) => setForm('desc', value)}
+            onChangeText={value => setForm('desc', value)}
           />
           <Gap height={24} />
           <Input
             label="Number of Points"
-            onChangeText={(value) => setForm('points', value)}
+            onChangeText={value => setForm('points', value)}
             keyboardType="numeric"
           />
           <Gap height={24} />
@@ -152,12 +168,12 @@ const TaskAdd = ({navigation}) => {
             <Text style={styles.label}>From: {timeFrom}</Text>
             <Button
               type="btn-modal"
-              title="Pick date time from"
+              title="Pick time from"
               onPress={showDatePickerFrom}
             />
             <DateTimePickerModal
               isVisible={timePickerVisibleFrom}
-              mode="datetime"
+              mode="time"
               onConfirm={handleConfirmFor}
               onCancel={hideDatePickerFrom}
             />
@@ -167,14 +183,29 @@ const TaskAdd = ({navigation}) => {
             <Text style={styles.label}>To: {timeTo}</Text>
             <Button
               type="btn-modal"
-              title="Pick date time to"
+              title="Pick time to"
               onPress={showDatePickerTo}
             />
             <DateTimePickerModal
               isVisible={timePickerVisibleTo}
-              mode="datetime"
+              mode="time"
               onConfirm={handleConfirmTo}
               onCancel={hideDatePickerTo}
+            />
+          </View>
+          <Gap height={24} />
+          <View>
+            <Text style={styles.label}>Date: {dateTask}</Text>
+            <Button
+              type="btn-modal"
+              title="Pick date"
+              onPress={showDatePicker}
+            />
+            <DateTimePickerModal
+              isVisible={datePickerVisible}
+              mode="date"
+              onConfirm={handleConfirmDate}
+              onCancel={hideDatePicker}
             />
           </View>
           <Gap height={50} />

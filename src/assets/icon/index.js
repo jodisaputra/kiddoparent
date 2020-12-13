@@ -11,7 +11,7 @@ import IconPlus from './ic-plus.svg';
 import IconAddPhoto from './ic-add.svg';
 import IconRemovePhoto from './ic-remove.svg';
 import IconNext from './ic-right';
-import IconTrash from './ic-trash.svg';
+
 export {
   IconBack,
   IconHomeActive,
@@ -26,5 +26,4 @@ export {
   IconAddPhoto,
   IconRemovePhoto,
   IconNext,
-  IconTrash,
 };

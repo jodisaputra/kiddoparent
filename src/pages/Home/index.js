@@ -1,9 +1,39 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {DummyBath} from '../../assets';
 import {Button, Header, HeaderProfile, ListItem} from '../../components';
+import {getData} from '../../utils/localstorage';
+import firestore from '@react-native-firebase/firestore';
+import moment from 'moment';
 
 const Home = ({navigation}) => {
+  const [listTask, setListTask] = useState([]);
+
+  useEffect(() => {
+    getDataTask();
+  }, []);
+
+  const getDataTask = () => {
+    const today = moment(new Date()).format('MMMM, Do YYYY');
+
+    getData('admin').then(res => {
+      firestore()
+        .collection('tasks')
+        .where('added_by', '==', res.email)
+        .where('date', '==', today)
+        .onSnapshot(docs => {
+          let listtasks = [];
+          docs.forEach(doc => {
+            listtasks.push({
+              ...doc.data(),
+              key: doc.id,
+            });
+          });
+          setListTask(listtasks);
+        });
+    });
+  };
+
   return (
     <View>
       <Header title="Home" headertype="no-icon" />
@@ -12,13 +42,18 @@ const Home = ({navigation}) => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.page}>
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="07:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
-          <ListItem point={20} title="Bath" avatar={DummyBath} time="08:00" />
+          {listTask.map(task => {
+            return (
+              <ListItem
+                key={task.key}
+                point={task.points}
+                title={task.task_title}
+                avatar={{uri: task.icon}}
+                time="07:00"
+                onPress={() => alert('tes')}
+              />
+            );
+          })}
         </View>
       </ScrollView>
       <View style={styles.floatbutton}>

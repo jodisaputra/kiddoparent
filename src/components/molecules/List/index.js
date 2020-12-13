@@ -5,7 +5,10 @@ import {colors, fonts} from '../../../utils';
 
 const List = ({onPress, onLongPress, point, title, avatar, time}) => {
   return (
-    <View style={styles.container} onPress={onPress} onLongPress={onLongPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      onLongPress={onLongPress}>
       <View>
         <IconStar style={styles.icon} />
         <Text style={styles.poin}>{point}</Text>
@@ -20,7 +23,7 @@ const List = ({onPress, onLongPress, point, title, avatar, time}) => {
           <Text>{time}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -58,4 +61,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.primary[600],
     color: colors.primary,
   },
+  avatar: {width: 50, height: 50},
 });

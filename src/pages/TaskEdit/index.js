@@ -1,21 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import firestore from '@react-native-firebase/firestore';
+import moment from 'moment';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   ScrollView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import {showMessage} from 'react-native-flash-message';
-import {IconAddPhoto, IconRemovePhoto, ILNullTask} from '../../assets';
-import {Gap, Header, Input, Button, Loading} from '../../components';
-import {colors, fonts, useForm} from '../../utils';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import moment from 'moment';
 import ImagePicker from 'react-native-image-picker';
-import firestore from '@react-native-firebase/firestore';
-import {getData} from '../../utils/localstorage';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import {IconAddPhoto, IconRemovePhoto, ILNullTask} from '../../assets';
+import {Button, Gap, Header, Input, Loading} from '../../components';
+import {colors, fonts} from '../../utils';
 
 const TaskEdit = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
@@ -24,9 +23,7 @@ const TaskEdit = ({navigation, route}) => {
   const [task, setTask] = useState({
     task_title: '',
     desc: '',
-    from: '',
-    to: '',
-    date: '',
+    points: '',
   });
 
   const changeText = (key, value) => {
@@ -44,8 +41,8 @@ const TaskEdit = ({navigation, route}) => {
     dbRef.get().then(result => {
       if (result.exists) {
         const tasks = result.data();
-        setPhoto({uri: tasks.icon});
-        setHasPhoto(true);
+        setIcon({uri: tasks.icon});
+        setHasIcon(true);
         setTask(tasks);
       } else {
         showMessage({
@@ -84,7 +81,7 @@ const TaskEdit = ({navigation, route}) => {
     setTimePickerVisibleFrom(false);
   };
   const handleConfirmFor = datetime => {
-    setTimeFrom(moment(datetime).format('MMMM, Do YYYY HH:mm'));
+    setTimeFrom(moment(datetime).format('HH:mm'));
     hideDatePickerFrom();
   };
 
@@ -96,16 +93,16 @@ const TaskEdit = ({navigation, route}) => {
     setTimePickerVisibleTo(false);
   };
   const handleConfirmTo = datetime => {
-    setTimeTo(moment(datetime).format('MMMM, Do YYYY HH:mm'));
+    setTimeTo(moment(datetime).format('HH:mm'));
     hideDatePickerTo();
   };
 
   // untuk ganti photo preview
-  const [photo, setPhoto] = useState(ILNullTask);
+  const [icon, setIcon] = useState(ILNullTask);
   // untuk memunculkan icon remove
-  const [hasPhoto, setHasPhoto] = useState(false);
+  const [hasIcon, setHasIcon] = useState(false);
   // upload photo
-  const [photoDB, setPhotoDB] = useState('');
+  const [iconDB, setIconDB] = useState('');
 
   const getImage = () => {
     ImagePicker.launchImageLibrary(
@@ -120,45 +117,93 @@ const TaskEdit = ({navigation, route}) => {
           });
         } else {
           const source = {uri: response.uri};
-          setPhotoDB(`data: ${response.type};base64, ${response.data}`);
-          setPhoto(source);
-          setHasPhoto(true);
+          setIconDB(`data: ${response.type};base64, ${response.data}`);
+          setIcon(source);
+          setHasIcon(true);
         }
       },
     );
   };
 
-  const saveTask = () => {
-    setLoading(true);
-    getData('admin').then(res => {
-      const email = res.email;
-      const data = {
-        task_title: form.task_title,
-        desc: form.desc,
-        points: form.points,
-        from: timeFrom,
-        to: timeTo,
-        icon: photoDB,
-        added_by: email,
-        status: 'not done',
-      };
-      firestore()
-        .collection('tasks')
-        .add(data)
-        .then(() => {
-          setLoading(false);
-          navigation.navigate('MainApp');
-        })
-        .catch(error => {
-          setLoading(false);
-          showMessage({
-            message: error,
-            type: 'default',
-            backgroundColor: colors.errorMessage,
-          });
-          console.log('error Save Task', errorMessage);
-          navigation.navigate('MainApp');
-        });
+  const update = () => {
+    // setLoading(true);
+    const dataUpdate = task;
+    dataUpdate.icon = iconDB;
+    dataUpdate.from = timeFrom;
+    dataUpdate.to = timeTo;
+    dataUpdate.date = dateTask;
+    console.log('data sebelum update', dataUpdate);
+    // const updateDbRef = firestore()
+    //   .collection('tasks')
+    //   .doc(taskItem);
+
+    // updateDbRef
+    //   .set(dataUpdate)
+    //   .then(() => {
+    //     setLoading(false);
+    //     console.log('success');
+    //     navigation.navigate('MainApp');
+    //   })
+    //   .catch(error => {
+    //     setLoading(false);
+    //     showMessage({
+    //       message: error,
+    //       type: 'default',
+    //       backgroundColor: colors.red1,
+    //     });
+    //   });
+  };
+
+  // data date dan time untuk update
+  const getTimeFromId = () => {
+    if (!timeFrom) {
+      return <Text style={styles.label}>From: {task.from}</Text>;
+    } else {
+      return <Text style={styles.label}>From: {timeFrom}</Text>;
+    }
+  };
+
+  const getTimeToId = () => {
+    if (!timeTo) {
+      return <Text style={styles.label}>To: {task.to}</Text>;
+    } else {
+      return <Text style={styles.label}>To: {timeTo}</Text>;
+    }
+  };
+
+  const getDateId = () => {
+    if (!dateTask) {
+      return <Text style={styles.label}>Date: {task.date}</Text>;
+    } else {
+      return <Text style={styles.label}>Date: {dateTask}</Text>;
+    }
+  };
+
+  const remove = () => {
+    Alert.alert(
+      'Delete reward',
+      'Are you sure?',
+      [
+        {text: 'Yes', onPress: () => removeAction()},
+        {
+          text: 'No',
+          onPress: () => console.log('No item was removed'),
+          style: 'cancel',
+        },
+      ],
+      {
+        cancelable: true,
+      },
+    );
+  };
+
+  const removeAction = () => {
+    const dbRef = firestore()
+      .collection('rewards')
+      .doc(rewardItem);
+    dbRef.delete().then(() => {
+      console.log('data deleted success');
+      navigation.navigate('Reward');
     });
   };
 
@@ -170,9 +215,9 @@ const TaskEdit = ({navigation, route}) => {
           <View style={styles.task}>
             <View style={styles.iconBorder}>
               <TouchableOpacity style={styles.avatarBorder} onPress={getImage}>
-                <Image source={photo} style={styles.avatar} />
-                {hasPhoto && <IconRemovePhoto style={styles.addPhoto} />}
-                {!hasPhoto && <IconAddPhoto style={styles.addPhoto} />}
+                <Image source={icon} style={styles.avatar} />
+                {hasIcon && <IconRemovePhoto style={styles.addPhoto} />}
+                {!hasIcon && <IconAddPhoto style={styles.addPhoto} />}
               </TouchableOpacity>
             </View>
           </View>
@@ -197,37 +242,37 @@ const TaskEdit = ({navigation, route}) => {
           />
           <Gap height={24} />
           <View>
-            <Text style={styles.label}>From: {timeFrom}</Text>
+            {getTimeFromId()}
             <Button
               type="btn-modal"
-              title="Pick date time from"
+              title="Pick time from"
               onPress={showDatePickerFrom}
             />
             <DateTimePickerModal
               isVisible={timePickerVisibleFrom}
-              mode="datetime"
+              mode="time"
               onConfirm={handleConfirmFor}
               onCancel={hideDatePickerFrom}
             />
           </View>
           <Gap height={24} />
           <View>
-            <Text style={styles.label}>To: {timeTo}</Text>
+            {getTimeToId()}
             <Button
               type="btn-modal"
-              title="Pick date time to"
+              title="Pick time to"
               onPress={showDatePickerTo}
             />
             <DateTimePickerModal
               isVisible={timePickerVisibleTo}
-              mode="datetime"
+              mode="time"
               onConfirm={handleConfirmTo}
               onCancel={hideDatePickerTo}
             />
           </View>
           <Gap height={24} />
           <View>
-            <Text style={styles.label}>Date: {dateTask}</Text>
+            {getDateId()}
             <Button
               type="btn-modal"
               title="Pick date"
@@ -242,7 +287,9 @@ const TaskEdit = ({navigation, route}) => {
           </View>
           <Gap height={50} />
           <View style={styles.button}>
-            <Button title="Save Task" onPress={saveTask} />
+            <Button title="Save Changes" onPress={update} />
+            <Gap height={24} />
+            <Button title="Delete" type="secondary" onPress={remove} />
           </View>
         </View>
       </ScrollView>

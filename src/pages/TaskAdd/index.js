@@ -64,11 +64,11 @@ const TaskAdd = ({navigation}) => {
   };
 
   // untuk ganti photo preview
-  const [photo, setPhoto] = useState(ILNullTask);
+  const [icon, setIcon] = useState(ILNullTask);
   // untuk memunculkan icon remove
-  const [hasPhoto, setHasPhoto] = useState(false);
+  const [hasIcon, setHasIcon] = useState(false);
   // upload photo
-  const [photoDB, setPhotoDB] = useState('');
+  const [iconDB, setIconDB] = useState('');
 
   const getImage = () => {
     ImagePicker.launchImageLibrary(
@@ -83,9 +83,9 @@ const TaskAdd = ({navigation}) => {
           });
         } else {
           const source = {uri: response.uri};
-          setPhotoDB(`data: ${response.type};base64, ${response.data}`);
-          setPhoto(source);
-          setHasPhoto(true);
+          setIconDB(`data: ${response.type};base64, ${response.data}`);
+          setIcon(source);
+          setHasIcon(true);
         }
       },
     );
@@ -108,7 +108,7 @@ const TaskAdd = ({navigation}) => {
         points: form.points,
         from: timeFrom,
         to: timeTo,
-        icon: photoDB,
+        icon: iconDB,
         added_by: email,
         status: 'not done',
         date: dateTask,
@@ -141,9 +141,9 @@ const TaskAdd = ({navigation}) => {
           <View style={styles.task}>
             <View style={styles.iconBorder}>
               <TouchableOpacity style={styles.avatarBorder} onPress={getImage}>
-                <Image source={photo} style={styles.avatar} />
-                {hasPhoto && <IconRemovePhoto style={styles.addPhoto} />}
-                {!hasPhoto && <IconAddPhoto style={styles.addPhoto} />}
+                <Image source={icon} style={styles.avatar} />
+                {hasIcon && <IconRemovePhoto style={styles.addPhoto} />}
+                {!hasIcon && <IconAddPhoto style={styles.addPhoto} />}
               </TouchableOpacity>
             </View>
           </View>
